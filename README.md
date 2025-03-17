@@ -12,7 +12,7 @@ A command-line utility for batch renaming files with powerful sorting and format
 
 ## Installation
 
-### Quick Install (Linux/macOS)
+### Quick Install/Update (Linux/macOS)
 ```
 sudo curl -fsSL https://raw.githubusercontent.com/apapamarkou/batch-rename-cli/main/brn -o /usr/bin/brn && sudo chmod +x /usr/bin/brn
 ```
