@@ -20,7 +20,39 @@ sudo curl -fsSL https://raw.githubusercontent.com/apapamarkou/batch-rename-cli/m
 ### Requirements
 
 - Python 3.x
+- Curl
 - Linux/Unix-based system
+
+#### Ubuntu/Debian
+```
+sudo apt update
+sudo apt install python3 curl
+```
+#### Fedora
+```
+sudo dnf update
+sudo dnf install python3 curl
+```
+#### OpenSUSE
+```
+sudo zypper refresh
+sudo zypper install python3 curl
+```
+#### Arch Linux
+```
+sudo pacman -Syu
+sudo pacman -S python curl
+```
+#### CentOS/RHEL
+```
+sudo yum update
+sudo yum install python3 curl
+```
+#### Alpine Linux
+```
+sudo apk update
+sudo apk add python3 curl
+```
 
 ## Usage
 
