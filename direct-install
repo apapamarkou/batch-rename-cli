@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#  _                
+# | |__  _ __ _ __  
+# | '_ \| '__| '_ \ 
+# | |_) | |  | | | |
+# |_.__/|_|  |_| |_|
+# 
+# Author: Andrianos Papamarkou
+# 
+# https://github.com/apapamarkou/batch-rename-cli
+# 
+
 # Installation script for brn (Batch Rename Utility)
 GITHUB_RAW_URL="https://raw.githubusercontent.com/apapamarkou/batch-rename-cli/main/brn"
 TARGET_PATH="/usr/bin/brn"

@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#  _                
+# | |__  _ __ _ __  
+# | '_ \| '__| '_ \ 
+# | |_) | |  | | | |
+# |_.__/|_|  |_| |_|
+# 
+# Author: Andrianos Papamarkou
+# 
+# https://github.com/apapamarkou/batch-rename-cli
+# 
+
 # Get the directory of the installation script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SOURCE_SCRIPT="$SCRIPT_DIR/brn"
