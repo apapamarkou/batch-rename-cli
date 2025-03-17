@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import glob
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Batch rename files.")
+    parser.add_argument("pattern", nargs="*", help="Filename or pattern (e.g., *.txt)")
+    parser.add_argument("--count", nargs="?", const="0", help="Replace filename with counter (optional zero padding)")
+    parser.add_argument("--count-after", nargs="?", const="0", help="Append counter before extension")
+    parser.add_argument("--count-before", nargs="?", const="0", help="Prepend counter to filename")
+    parser.add_argument("-s", "--starting", type=int, default=1, help="Start counting from this number")
+    parser.add_argument("--add-after", help="Add string after filename before extension")
+    parser.add_argument("--add-before", help="Add string before filename")
+    parser.add_argument("--name", help="Replace filename with this string")
+    parser.add_argument("--suffix", help="Replace or add file extension")
+    parser.add_argument("--sort-name", choices=['asc', 'desc'], help="Sort by name (asc/desc)")
+    parser.add_argument("--sort-date", choices=['asc', 'desc'], help="Sort by modification date (asc/desc)")
+    parser.add_argument("--sort-size", choices=['asc', 'desc'], help="Sort by file size (asc/desc)")
+    parser.add_argument("-f", "--no-confirm", action="store_true", help="No confirmation needed")
+    return parser.parse_args()
+
+def get_files(patterns, sort_by=None, sort_order=None):
+    if patterns:
+        files = []
+        for pattern in patterns:
+            files.extend(glob.glob(pattern))
+    else:
+        files = os.listdir()
+    
+    # Filter only files (no directories)
+    files = [f for f in files if os.path.isfile(f)]
+    
+    # Apply sorting based on parameters
+    if sort_by == 'name':
+        files.sort(reverse=(sort_order == 'desc'))
+    elif sort_by == 'date':
+        files.sort(key=lambda x: os.path.getmtime(x), 
+                  reverse=(sort_order == 'desc'))
+    elif sort_by == 'size':
+        files.sort(key=lambda x: os.path.getsize(x), 
+                  reverse=(sort_order == 'desc'))
+    
+    return files
+
+
+def format_counter(index, padding):
+    return str(index).zfill(len(padding)) if padding.isdigit() else str(index)
+
+def rename_files(files, args):
+    if not files:
+        print("Error: No files found.")
+        sys.exit(1)
+    
+    new_names = []
+    counter = args.starting
+    
+    for file in files:
+        name, ext = os.path.splitext(file)
+        new_name = name
+        
+        if args.name:
+            if len(files) > 1 and not (args.count or args.count_after or args.count_before):
+                print("Error: --name specified for multiple files without a counter.")
+                sys.exit(1)
+            new_name = args.name
+
+        if args.count:
+            new_name = format_counter(counter, args.count)
+        elif args.count_before:
+            new_name = format_counter(counter, args.count_before) + new_name
+        elif args.count_after:
+            new_name = new_name + format_counter(counter, args.count_after)
+        
+        if args.add_before:
+            new_name = args.add_before + new_name
+        
+        if args.add_after:
+            new_name = new_name + args.add_after
+
+        # Handle suffix replacement/addition
+        if args.suffix:
+            ext = f".{args.suffix.lstrip('.')}"
+        
+        new_names.append((file, f"{new_name}{ext}"))
+        counter += 1
+    
+    # Find the longest filename for padding
+    max_old_length = max(len(old) for old, _ in new_names)
+    max_new_length = max(len(new) for _, new in new_names)
+    
+    # Print header
+    print("\nProposed renaming:")
+    print("─" * (max_old_length + max_new_length + 7))  # 7 accounts for spacing and arrow
+    
+    # Print the preview with aligned columns
+    for old, new in new_names:
+        print(f"{old:<{max_old_length}}  →  {new}")
+    
+    print("─" * (max_old_length + max_new_length + 7))
+    
+    if not args.no_confirm:
+        confirm = input("\nProceed with renaming? (y/n): ")
+        if confirm.lower() != "y":
+            print("Aborted.")
+            sys.exit(1)
+    
+    for old, new in new_names:
+        os.rename(old, new)
+    print("Renaming complete.")
+
+
+def main():
+    args = parse_args()
+    
+    # Determine sorting method
+    sort_by = None
+    sort_order = None
+    
+    if args.sort_name:
+        sort_by = 'name'
+        sort_order = args.sort_name
+    elif args.sort_date:
+        sort_by = 'date'
+        sort_order = args.sort_date
+    elif args.sort_size:
+        sort_by = 'size'
+        sort_order = args.sort_size
+    
+    files = get_files(args.pattern, sort_by, sort_order)
+    rename_files(files, args)
+
+if __name__ == "__main__":
+    main()

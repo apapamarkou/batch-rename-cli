@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Get the directory of the installation script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SOURCE_SCRIPT="$SCRIPT_DIR/brn"
+TARGET_PATH="/usr/bin/brn"
+
+# Function to print error messages
+error() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+# Check if script is run with sudo
+if [ "$EUID" -ne 0 ]; then
+    error "This script must be run with sudo privileges"
+fi
+
+# Check if source script exists
+if [ ! -f "$SOURCE_SCRIPT" ]; then
+    error "Could not find source script at $SOURCE_SCRIPT"
+fi
+
+# Check if Python 3 is installed
+if ! command -v python3 &> /dev/null; then
+    error "Python 3 is required but not installed"
+fi
+
+# Make the script executable
+chmod +x "$SOURCE_SCRIPT" || error "Failed to make script executable"
+
+# Copy script to /usr/bin
+cp "$SOURCE_SCRIPT" "$TARGET_PATH" || error "Failed to copy script to $TARGET_PATH"
+
+# Verify installation
+if [ -f "$TARGET_PATH" ] && [ -x "$TARGET_PATH" ]; then
+    echo "Installation successful! You can now use 'brn' command from anywhere"
+    echo
+    echo "Usage examples:"
+    echo "  brn *.jpg --count 001"
+    echo "  brn *.png --sort-size desc --count 001"
+    echo "  brn --help"
+else
+    error "Installation verification failed"
+fi

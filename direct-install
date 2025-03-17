@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Installation script for brn (Batch Rename Utility)
+GITHUB_RAW_URL="https://raw.githubusercontent.com/apapamarkou/batch-rename-cli/main/brn"
+TARGET_PATH="/usr/bin/brn"
+
+# Function to print error messages
+error() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check if script is run with sudo/root
+if [ "$EUID" -ne 0 ]; then
+    error "This script must be run with sudo privileges"
+fi
+
+# Check if Python 3 is installed
+if ! command_exists python3; then
+    error "Python 3 is required but not installed"
+fi
+
+echo "Installing brn (Batch Rename Utility)..."
+
+# Try curl first, then wget if curl is not available
+if command_exists curl; then
+    echo "Downloading using curl..."
+    if ! curl -fsSL "$GITHUB_RAW_URL" -o "$TARGET_PATH"; then
+        error "Failed to download brn"
+    fi
+elif command_exists wget; then
+    echo "Downloading using wget..."
+    if ! wget -q "$GITHUB_RAW_URL" -O "$TARGET_PATH"; then
+        error "Failed to download brn"
+    fi
+else
+    error "Neither curl nor wget is available"
+fi
+
+# Make the script executable
+chmod +x "$TARGET_PATH" || error "Failed to make script executable"
+
+# Verify installation
+if [ -f "$TARGET_PATH" ] && [ -x "$TARGET_PATH" ]; then
+    echo "Installation successful! You can now use 'brn' command from anywhere"
+    echo
+    echo "Usage examples:"
+    echo "  brn *.jpg --count 001"
+    echo "  brn *.png --sort-size desc --count 001"
+    echo "  brn --help"
+else
+    error "Installation verification failed"
+fi
